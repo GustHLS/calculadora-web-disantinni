@@ -14,7 +14,6 @@ dados_conexao = (
 
 engine = create_engine(f"mssql+pyodbc:///?odbc_connect={dados_conexao}")
 
-
 def teste_conexao():
     query = "SELECT TOP 1 * FROM fluxo_pessoas"
     df = pd.read_sql(query, engine)
