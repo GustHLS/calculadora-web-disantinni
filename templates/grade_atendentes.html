@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade de Atendentes</title>
+
+    <link rel="icon" type="image/jpeg" sizes="128x128" href="{{ url_for('static', filename='img/DS_128x128.jpg') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/grade_atendentes.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="main-title">Grade de Atendentes</h1>
+        </div>
+
+        {% for dia in range(dias_do_mes) %}
+            <div class="grade-info">
+                <div class="info-row">
+                    <div class="info-item">
+                        <span class="info-label">Data:</span>
+                        <span class="info-value">{{ dados_grade['data_grade'][dia] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Fluxo do Dia:</span>
+                        <span class="info-value">{{ dados_grade['soma_fluxo_dia_grade'][dia] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Fluxo do Mês:</span>
+                        <span class="info-value">{{ dados_grade['soma_fluxo_mes_grade'] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Variação:</span>
+                        {% if dados_grade['variacao_grade'][dia] >= 0 %}
+                            <span class="info-value" style="color: #27ae60;">{{ "%.2f"|format(dados_grade['variacao_grade'][dia]) }}</span>
+                        {% else %}
+                            <span class="info-value" style="color: #e74c3c;">{{ "%.2f"|format(dados_grade['variacao_grade'][dia]) }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="fluxo-section">
+                    <div class="fluxo-title">Fluxo Horário</div>
+                    <div class="fluxo-data">
+                        {% for hora in dados_grade['fluxo_horario_grade'][dia] %}
+                            <span class="fluxo-hora">{{ hora }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="attendance-grid">
+                <!-- Seção Atendentes -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Atendentes</div>
+                        <div class="section-subtitle">Equipe Salão</div>
+                    </div>
+
+                    {% for atendente in dados_grade['atendentes_grade'][dia] %}
+                        {% set horario = loop.index0 %}
+                        <div class="attendant-list">
+                            <div class="attendant-card">
+                                <div class="attendant-name">{{ atendente }}</div>
+                                <div class="schedule-info">
+                                    <div class="schedule-item entrada">
+                                        <div class="schedule-label">Entrada</div>
+                                        <div class="schedule-time">{{ dados_grade['atendentes_entrada_grade'][dia][horario] }}</div>
+                                    </div>
+                                    <div class="schedule-item almoco">
+                                        <div class="schedule-label">Almoço</div>
+                                        <div class="schedule-time">{{ dados_grade['atendentes_almoco_grade'][dia][horario] }}</div>
+                                    </div>
+                                    <div class="schedule-item saida">
+                                        <div class="schedule-label">Saída</div>
+                                        <div class="schedule-time">{{ dados_grade['atendentes_saida_grade'][dia][horario] }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+                <!-- Seção Estoquistas -->
+                <div class="section">
+                    <div class="section-header" style="background: linear-gradient(135deg, #f39c12 0%, #f1c40f 50%, #e67e22 100%);">
+                        <div class="section-title">Estoquistas</div>
+                        <div class="section-subtitle">Equipe Estoque</div>
+                    </div>
+
+                    {% for estoquista in dados_grade['estoquistas_grade'][dia] %}
+                        {% set horario = loop.index0 %}
+                        <div class="attendant-list estoquista">
+                            <div class="attendant-card">
+                                <div class="attendant-name">{{ estoquista }}</div>
+                                <div class="schedule-info">
+                                    <div class="schedule-item entrada">
+                                        <div class="schedule-label">Entrada</div>
+                                        <div class="schedule-time">{{ dados_grade['estoquistas_entrada_grade'][dia][horario] }}</div>
+                                    </div>
+                                    <div class="schedule-item almoco">
+                                        <div class="schedule-label">Almoço</div>
+                                        <div class="schedule-time">{{ dados_grade['estoquistas_almoco_grade'][dia][horario] }}</div>
+                                    </div>
+                                    <div class="schedule-item saida">
+                                        <div class="schedule-label">Saída</div>
+                                        <div class="schedule-time">{{ dados_grade['estoquistas_saida_grade'][dia][horario] }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+
+            <br><br><br><br>
+        {% endfor %}
+
+    </div>
+
+    <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()" title="Voltar ao topo">
+    </button>
+
+    <!-- Modal de Saldo de Horas -->
+    <div id="modalSaldo" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Saldo de Horas dos Atendentes</h2>
+                <button class="modal-close" onclick="fecharModalSaldo()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="saldo-headers">
+                    <div class="saldo-header">Nome do Atendente</div>
+                    <div class="saldo-header">Saldo Anterior</div>
+                    <div class="saldo-header">Saldo Atual</div>
+                </div>
+                <div id="saldoList">
+                    <!-- Dados serão inseridos aqui pelo JavaScript -->
+                    {% if dados_grade['nome_atendentes_saldo'] %}
+                        {% for i in range(dados_grade['nome_atendentes_saldo']|length) %}
+                        <div class="saldo-item">
+                            <div class="saldo-nome">{{ dados_grade['nome_atendentes_saldo'][i] }}</div>
+                            <div class="saldo-valor saldo-antigo">{{ dados_grade['saldo_horas_antigo'][i] }}</div>
+                            <div class="saldo-valor saldo-novo">{{ dados_grade['saldo_horas_novo'][i] }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <p>Nenhum dado de saldo disponível</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Carregamento Exportação -->
+    <div id="loadingModal" class="loading-modal">
+        <div class="loading-content">
+            <div id="loadingText" class="loading-text">Exportando dados para Excel...</div>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Carregamento Exportação -->
+    <div id="exportedConfirm" class="loading-modal">
+        <div class="loading-content">
+            <div id="loadingText" class="loading-text">Exportação para o Excel concluída com sucesso!</div>
+            <button class="ok-button" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <!-- Versão alternativa com SVG -->
+    <button class="scroll-to-top svg-arrow" id="scrollToTop" onclick="scrollToTop()" title="Voltar ao topo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 14L12 9L17 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+
+    <!-- Botões de Ação -->
+    <div class="fixed-buttons">
+        <button class="action-button excel-button" onclick="gerarExcel()" title="Gerar Excel">
+            <img src="https://img.icons8.com/?size=100&id=117561&format=png&color=000000" alt="Excel">
+        </button>
+        <button class="action-button saldo-button" onclick="abrirModalSaldo()" title="Ver Saldo de Horas">
+            <img src="https://img.icons8.com/?size=100&id=85185&format=png&color=ffffff" alt="Saldo">
+        </button>
+    </div>
+
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/grade_atendentes.js') }}"></script>
+
+
+</body>
+</html>
