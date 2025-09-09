@@ -22,3 +22,6 @@ def home():
         meses=get_meses(),
         anos=get_anos()
     )
+
+if __name__ == '__main__':
+    app.run(debug=True)
