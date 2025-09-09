@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Ícone da página -->
+    <link rel="icon" type="image/jpeg" sizes="128x128" href="{{ url_for('static', filename='img/DS_128x128.jpg') }}">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css">
+
+    <!-- Fontes do Google -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
+
+    <title>Calculadora Di Santinni</title>
+</head>
+<body>
+
+    <header>
+        <h1 style="font-family: 'Bebas Neue';">Calculadora Quadro de Escala de Atendentes Di Santinni</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Parâmetros</h1>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="lojaSelect">Loja</label>
+                    <div class="custom-select" data-select="loja">
+                        <div class="select-button">
+                            <span class="selected-text placeholder">Selecione uma loja</span>
+                            <div class="arrow"></div>
+                        </div>
+
+                        <div class="dropdown hidden">
+                            <input type="text" class="search-input" placeholder="Digite para buscar...">
+                            <div class="options-container">
+                                {% for loja in lojas %}
+                                    <div class="option" data-value="{{ loja }}">{{ loja }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="anoSelect">Ano</label>
+                    <div class="custom-select" data-select="ano">
+                        <div class="select-button">
+                            <span class="selected-text placeholder">Selecione um ano</span>
+                            <div class="arrow"></div>
+                        </div>
+
+                        <div class="dropdown hidden">
+                            <input type="text" class="search-input" placeholder="Digite para buscar...">
+                            <div class="options-container">
+                                {% for ano in anos %}
+                                    <div class="option" data-value="{{ ano }}">{{ ano }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mesSelect">Mês</label>
+                    <div class="custom-select" data-select="mes">
+                        <div class="select-button">
+                            <span class="selected-text placeholder">Selecione um mês</span>
+                            <div class="arrow"></div>
+                        </div>
+
+                        <div class="dropdown hidden">
+                            <input type="text" class="search-input" placeholder="Digite para buscar...">
+                            <div class="options-container">
+                                {% for mes in meses %}
+                                    <div class="option" data-value="{{ mes }}">{{ mes }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="porcentagemInput">Porcentagem (%)</label>
+                    <div class="input-container">
+                        <input type="number"
+                            id="porcentagemInput"
+                            class="percentage-input"
+                            placeholder="Digite a porcentagem..."
+                            step="0.02"
+                            min="-100"
+                            max="999.99"
+                            maxlength="6">
+                        <span class="percentage-symbol">%</span>
+                    </div>
+                    <small class="input-helper" style="text-align: center;">Digite apenas números (ex: 15.5 | min -100.00 | max +999.99)</small>
+                </div>
+            </div>
+
+            <div class="options-section">
+                <div class="modals-group">
+                    <div class="checkbox-item">
+                        <button type="button" class="custom-btn secondary-btn" onclick="abrirModalTaxas()">Alterar Taxas</button>
+                    </div>
+                    <div class="checkbox-item">
+                        <button type="button" class="custom-btn secondary-btn" onclick="abrirModal()">Definir Histórico de Atendentes</button>
+                    </div>
+                </div>
+
+                <button class="generate-button" onclick="gerarGrade()">Gerar Grade</button>
+            </div>
+        </div>
+
+        <!-- Modal para Histórico de Atendentes -->
+        <div id="historicoModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Histórico de Atendentes</h2>
+                    <button class="close-btn" onclick="fecharModal()">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <table class="attendants-table">
+                        <thead>
+                            <tr>
+                                <th>Atendente</th>
+                                <th>Dias Seguidos</th>
+                                <th>Domingos Seguidos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendantsTableBody">
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="modal-btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+                    <button class="modal-btn btn-save" onclick="salvarHistorico()">Salvar</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Modal para Alterar Taxas -->
+        <div id="taxasModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Alterar Taxas</h2>
+                    <button class="close-btn" onclick="fecharModalTaxas()">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="taxas-form">
+                        <div class="taxa-group">
+                            <label for="saida1Input">Taxa de Saída 1</label>
+                            <div class="input-container">
+                                <input type="number"
+                                    id="saida1Input"
+                                    class="percentage-input"
+                                    placeholder="Digite a taxa de saída 1..."
+                                    step="0.02"
+                                    min="-100"
+                                    max="999.99"
+                                    maxlength="6">
+                            </div>
+                            <small class="input-helper">Digite apenas números (ex: 15.5 | min -100.00 | max +999.99)</small>
+                        </div>
+
+                        <div class="taxa-group">
+                            <label for="saida2Input">Taxa de Saída 2</label>
+                            <div class="input-container">
+                                <input type="number"
+                                    id="saida2Input"
+                                    class="percentage-input"
+                                    placeholder="Digite a taxa de saída 2..."
+                                    step="0.02"
+                                    min="-100"
+                                    max="999.99"
+                                    maxlength="6">
+                            </div>
+                            <small class="input-helper">Digite apenas números (ex: 15.5 | min -100.00 | max +999.99)</small>
+                        </div>
+
+                        <div class="taxa-group">
+                            <label for="atendimentoMedioInput">Taxa de Atendimento Médio</label>
+                            <div class="input-container">
+                                <input type="number"
+                                    id="atendimentoMedioInput"
+                                    class="percentage-input"
+                                    placeholder="Digite a taxa de atendimento médio..."
+                                    step="0.02"
+                                    min="-100"
+                                    max="999.99"
+                                    maxlength="6">
+                            </div>
+                            <small class="input-helper">Digite apenas números (ex: 15.5 | min -100.00 | max +999.99)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="modal-btn btn-cancel" onclick="fecharModalTaxas()">Cancelar</button>
+                    <button class="modal-btn btn-save" onclick="salvarTaxas()">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+         <!-- Modal de Loading -->
+        <div id="loadingModal" class="loading-modal">
+            <div class="loading-content">
+                <div id="loadingText" class="loading-text">Carregando fluxo...</div>
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>
